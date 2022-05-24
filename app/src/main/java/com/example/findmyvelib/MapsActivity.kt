@@ -1,25 +1,29 @@
 package com.example.findmyvelib
 
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.location.Location
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-
+import com.example.findmyvelib.databinding.ActivityMapsBinding
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import com.example.findmyvelib.databinding.ActivityMapsBinding
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private lateinit var map: GoogleMap
     private lateinit var binding: ActivityMapsBinding
     private lateinit var lastLocation: Location
-
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
@@ -36,6 +40,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
 
     /**
@@ -50,20 +55,53 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
 
-        // Add a marker in Sydney and move the camera
-        val paris = LatLng(48.8534100, 2.3488000)
-        map.addMarker(MarkerOptions().position(paris).title("Paris"))
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(paris, 12.0f))     // permet de centrer la caméra sur Paris et zoom dessus
+        map.uiSettings.isZoomControlsEnabled = true
+        map.setOnMarkerClickListener(this)
 
         setUpMap()
     }
 
     private fun setUpMap() {
-        if (ActivityCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
+                LOCATION_PERMISSION_REQUEST_CODE
+            )
             return
         }
+
+
+        map.isMyLocationEnabled = true
+        /* isMyLocationEnabled = true enables the my-location layer which draws a light blue dot on the user’s location.
+        It also adds a button to the map that, when tapped, centers the map on the user’s location.*/
+
+        fusedLocationClient.lastLocation.addOnSuccessListener(this) { location ->
+            // fusedLocationClient.getLastLocation() gives you the most recent location currently available.
+
+            // Got last known location. In some rare situations this can be null.
+            // If you were able to retrieve the the most recent location, then move the camera to the user’s current location.
+            if (location != null) {
+                lastLocation = location
+                val currentLatLng = LatLng(location.latitude, location.longitude)
+                placeMarkerOnMap(currentLatLng)
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 12f))
+            }
+        }
     }
+    private fun placeMarkerOnMap(location: LatLng) {
+        // Create a MarkerOptions object and sets the user’s current location as the position for the marker
+        val markerOptions = MarkerOptions()
+            .position(location)
+            .icon(BitmapDescriptorFactory.fromResource(R.drawable.perso))
+
+        // Add the marker to the map
+        map.addMarker(markerOptions)
+    }
+
+    override fun onMarkerClick(p0: Marker): Boolean = false
 }
