@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".StationVelib"
+    android:orientation="vertical"
+    android:layout_margin="10dp"
+    android:weightSum="4">
+
+    <TextView
+        android:layout_weight="1"
+        android:id="@+id/nomTv"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nom de la station"
+        android:textSize="40sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_weight="1">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Adresse : "
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/adresseTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="adresse"
+            android:textStyle="bold"
+            android:textSize="25sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vélos disponibles : "
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/veloDispoTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="nombre / capacité"
+                android:textStyle="bold"
+                android:textSize="25sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginStart="50dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="- Electrique : "
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/elecTv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="nombre"
+                    android:textStyle="bold"
+                    android:textSize="25sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="- Mécanique : "
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/mecaTv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="nombre"
+                    android:textStyle="bold"
+                    android:textSize="25sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_weight="1">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bornes libres : "
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/sexeClientTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="nombre / capacité"
+            android:textStyle="bold"
+            android:textSize="25sp" />
+    </LinearLayout>
+</LinearLayout>

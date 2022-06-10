@@ -1,22 +1,28 @@
 package com.example.findmyvelib
 
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.findmyvelib.databinding.ActivityMapsBinding
+import com.example.findmyvelib.models.InfoStation
+import com.example.findmyvelib.services.InfoApi
+import com.example.findmyvelib.services.ServiceBuilder
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
@@ -25,11 +31,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     private lateinit var lastLocation: Location
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
+    private lateinit var infoBorne: List<InfoStation>
+
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d("Response", "countrylist size : ${infoBorne.size}")
+
         super.onCreate(savedInstanceState)
 
         binding = ActivityMapsBinding.inflate(layoutInflater)
@@ -41,17 +51,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         mapFragment.getMapAsync(this)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        loadStations()
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
 
@@ -75,7 +78,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
             return
         }
 
-
         map.isMyLocationEnabled = true
         /* isMyLocationEnabled = true enables the my-location layer which draws a light blue dot on the user’s location.
         It also adds a button to the map that, when tapped, centers the map on the user’s location.*/
@@ -88,20 +90,78 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
             if (location != null) {
                 lastLocation = location
                 val currentLatLng = LatLng(location.latitude, location.longitude)
-                placeMarkerOnMap(currentLatLng)
+//                placeMarkerOnMap(currentLatLng)
                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 12f))
             }
         }
+
+
+/*        val service = getInfo().create(InfosStations::class.java)
+        val status = getStatut().create(StatusStation::class.java)
+
+        runBlocking {
+            val result = service.toString()
+            Log.d(TAG, "synchroAPI: ${result.data.stations}")
+        }*/
     }
+
+    // permet de mettre une pastille a la position des bornes
     private fun placeMarkerOnMap(location: LatLng) {
         // Create a MarkerOptions object and sets the user’s current location as the position for the marker
         val markerOptions = MarkerOptions()
             .position(location)
-            .icon(BitmapDescriptorFactory.fromResource(R.drawable.perso))
 
         // Add the marker to the map
         map.addMarker(markerOptions)
     }
 
     override fun onMarkerClick(p0: Marker): Boolean = false
+
+    private fun loadStations() {
+        //initiate the service
+        val stationService = ServiceBuilder.buildServiceInfo(InfoApi::class.java)
+        val requestCall = stationService.getInfoStation()
+        //make network call asynchronously
+        requestCall.enqueue(object : Callback<List<InfoStation>> {
+            override fun onResponse(
+                call: Call<List<InfoStation>>,
+                response: Response<List<InfoStation>>
+            ) {
+                Log.d("Response", "onResponse: ${response.body()}")
+                if (response.isSuccessful) {
+                    infoBorne = response.body()!!
+                    Log.d("Response", "countrylist size : ${infoBorne.size}")
+                    for (location in infoBorne) {
+                        val stations = location.data.stations
+                        stations.map {
+                            InfoStation.Data.Station(
+                                it.capacity,
+                                it.lat,
+                                it.lon,
+                                it.name,
+                                it.rental_methods,
+                                it.stationCode,
+                                it.station_id
+                            )
+                        }
+                            .map {
+                                val station = LatLng(it.lat, it.lon)
+                                placeMarkerOnMap(station)
+                            }
+                    }
+                } else {
+                    Toast.makeText(
+                        this@MapsActivity,
+                        "Something went wrong ${response.message()}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+            override fun onFailure(call: Call<List<InfoStation>>, t: Throwable) {
+                Toast.makeText(this@MapsActivity, "Something went wrong $t", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        })
+    }
 }

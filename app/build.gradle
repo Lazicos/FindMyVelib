@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
+    id 'kotlinx-serialization'
 }
 
 android {
@@ -36,11 +37,31 @@ android {
 }
 
 dependencies {
+    //for material themes
+    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'com.squareup.picasso:picasso:2.71828'
+    
+    // Kotlinx Serialization dependency
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
+
+    // Retrofit kotlin-serialzation-converter
+    // It lets Retrofit use the Kotlin Serialization library to convert API requests and responses.
+    implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
+
+    implementation "com.squareup.okhttp3:okhttp:4.7.2"
+    implementation("com.squareup.okhttp3:logging-interceptor:3.9.0")
+
+    //retrofit requisites retro+gson
+    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
+
     implementation 'com.google.android.gms:play-services-location:19.0.1'
 
-    implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'androidx.appcompat:appcompat:1.4.1'
-    implementation 'com.google.android.material:material:1.6.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9'
+
+    implementation 'androidx.core:core-ktx:1.8.0'
+    implementation 'androidx.appcompat:appcompat:1.4.2'
+    implementation 'com.google.android.material:material:1.6.1'
     implementation 'com.google.android.gms:play-services-maps:18.0.2'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     testImplementation 'junit:junit:4.13.2'
