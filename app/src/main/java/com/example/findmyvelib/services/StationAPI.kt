@@ -6,8 +6,12 @@ import retrofit2.Call
 import retrofit2.http.GET
 
 interface InfoApi {
-    @GET("stations")
-    fun getInfoStation(): Call<List<InfoStation>>
-    fun getStatutStation(): Call<List<StatutStation>>
+    @GET("station_information.json")
+    fun getInfoStation(): Call<InfoStation>
+//    fun getStatutStation(): Call<List<StatutStation>>
+}
 
+interface StatutApi {
+    @GET("station_status.json")
+    fun getStatutStation(): Call<StatutStation>
 }

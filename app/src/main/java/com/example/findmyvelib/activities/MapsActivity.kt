@@ -1,10 +1,10 @@
 package com.example.findmyvelib.activities
 
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.findmyvelib.R
@@ -27,19 +27,19 @@ import retrofit2.Response
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
-    private lateinit var map: GoogleMap
+    private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
     private lateinit var lastLocation: Location
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    private lateinit var infoBorne: List<InfoStation>
+    private lateinit var infoBorne: InfoStation
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d("Response", "countrylist size : ${infoBorne.size}")
+//        Log.d("Response", "countrylist size : ${infoBorne.size}")
 
         super.onCreate(savedInstanceState)
 
@@ -52,17 +52,24 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         mapFragment.getMapAsync(this)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
-        loadStations()
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
-        map = googleMap
+        mMap = googleMap
 
-        map.uiSettings.isZoomControlsEnabled = true
-        map.setOnMarkerClickListener(this)
+        mMap.uiSettings.isZoomControlsEnabled = true
+        mMap.setOnMarkerClickListener(this)
 
         setUpMap()
+
+        /*mMap.setOnMarkerClickListener { marker ->
+            if (marker.isInfoWindowShown) {
+                marker.hideInfoWindow()
+            } else {
+                marker.showInfoWindow()
+            }
+            true
+        }*/
     }
 
     private fun setUpMap() {
@@ -79,7 +86,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
             return
         }
 
-        map.isMyLocationEnabled = true
+        mMap.isMyLocationEnabled = true
         /* isMyLocationEnabled = true enables the my-location layer which draws a light blue dot on the user’s location.
         It also adds a button to the map that, when tapped, centers the map on the user’s location.*/
 
@@ -92,76 +99,76 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
                 lastLocation = location
                 val currentLatLng = LatLng(location.latitude, location.longitude)
 //                placeMarkerOnMap(currentLatLng)
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 12f))
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 12f))
             }
         }
 
-
-/*        val service = getInfo().create(InfosStations::class.java)
-        val status = getStatut().create(StatusStation::class.java)
-
-        runBlocking {
-            val result = service.toString()
-            Log.d(TAG, "synchroAPI: ${result.data.stations}")
+        /*val findStation = FindStation()
+        val stations = findStation.loadInfo()
+        stations?.map {
+            Log.d("Response", "On map!!!")
+            val station = LatLng(it.lat, it.lon)
+            placeMarkerOnMap(station, it.station_id)
         }*/
+
+//        val (pos, id) = LoadStations.loadInfo()
+        loadStations()
     }
 
     // permet de mettre une pastille a la position des bornes
-    private fun placeMarkerOnMap(location: LatLng) {
+    private fun placeMarkerOnMap(location: LatLng, id: Long) {
         // Create a MarkerOptions object and sets the user’s current location as the position for the marker
         val markerOptions = MarkerOptions()
             .position(location)
+            .title(id.toString())
+        Log.d("Response", "on place capteur!")
 
         // Add the marker to the map
-        map.addMarker(markerOptions)
+        mMap.addMarker(markerOptions)
     }
 
-    override fun onMarkerClick(p0: Marker): Boolean = false
+    override fun onMarkerClick(marker: Marker): Boolean {
+        val id = marker.title
+        val intent = Intent(this@MapsActivity, StationVelib::class.java)
+        intent.putExtra("id", id)
+        startActivity(intent)
+
+        return false
+    }
 
     private fun loadStations() {
         //initiate the service
         val stationService = ServiceBuilder.buildServiceInfo(InfoApi::class.java)
         val requestCall = stationService.getInfoStation()
         //make network call asynchronously
-        requestCall.enqueue(object : Callback<List<InfoStation>> {
-            override fun onResponse(
-                call: Call<List<InfoStation>>,
-                response: Response<List<InfoStation>>
-            ) {
+        requestCall.enqueue(object : Callback<InfoStation> {
+            override fun onResponse(call: Call<InfoStation>, response: Response<InfoStation>) {
                 Log.d("Response", "onResponse: ${response.body()}")
                 if (response.isSuccessful) {
                     infoBorne = response.body()!!
-                    Log.d("Response", "countrylist size : ${infoBorne.size}")
-                    for (location in infoBorne) {
-                        val stations = location.data.stations
-                        stations.map {
-                            InfoStation.Data.Station(
-                                it.capacity,
-                                it.lat,
-                                it.lon,
-                                it.name,
-                                it.rental_methods,
-                                it.stationCode,
-                                it.station_id
-                            )
-                        }
-                            .map {
-                                val station = LatLng(it.lat, it.lon)
-                                placeMarkerOnMap(station)
-                            }
+                    Log.d("Response", "countrylist size : $infoBorne")
+//                        for (location in infoBorne) {
+                    val stations = infoBorne.data.stations
+                    stations.map {
+                        InfoStation.Data.Station(
+                            it.capacity,
+                            it.lat,
+                            it.lon,
+                            it.name,
+                            it.rental_methods,
+                            it.stationCode,
+                            it.station_id
+                        )
                     }
-                } else {
-                    Toast.makeText(
-                        this@MapsActivity,
-                        "Something went wrong ${response.message()}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                        .map {
+                            val station = LatLng(it.lat, it.lon)
+                            placeMarkerOnMap(station, it.station_id)
+                        }
                 }
             }
 
-            override fun onFailure(call: Call<List<InfoStation>>, t: Throwable) {
-                Toast.makeText(this@MapsActivity, "Something went wrong $t", Toast.LENGTH_SHORT)
-                    .show()
+            override fun onFailure(call: Call<InfoStation>, t: Throwable) {
+                Log.d("ResponseonFailure", "Something went wrong $t")
             }
         })
     }

@@ -3,7 +3,8 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/FindMyVelib/app/src/main/res/layout/activity_station_velib.xml" value="0.215625" />
+        <entry key="..\:/FindMyVelib/app/src/main/res/drawable/position.xml" value="0.205" />
+        <entry key="..\:/FindMyVelib/app/src/main/res/layout/activity_station_velib.xml" value="0.1" />
       </map>
     </option>
   </component>

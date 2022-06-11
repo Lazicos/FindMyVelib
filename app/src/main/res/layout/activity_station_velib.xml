@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".StationVelib"
+    tools:context=".activities.StationVelib"
     android:orientation="vertical"
     android:layout_margin="10dp"
     android:weightSum="4">
@@ -59,7 +59,15 @@
                 android:id="@+id/veloDispoTv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="nombre / capacité"
+                android:text="nombre "
+                android:textStyle="bold"
+                android:textSize="25sp" />
+
+            <TextView
+                android:id="@+id/capaciteTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="/ capacité"
                 android:textStyle="bold"
                 android:textSize="25sp" />
         </LinearLayout>
@@ -125,10 +133,18 @@
             android:textSize="20sp" />
 
         <TextView
-            android:id="@+id/sexeClientTv"
+            android:id="@+id/borneTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="nombre / capacité"
+            android:text="nombre "
+            android:textStyle="bold"
+            android:textSize="25sp" />
+
+        <TextView
+            android:id="@+id/capaciteeTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="/ capacité"
             android:textStyle="bold"
             android:textSize="25sp" />
     </LinearLayout>

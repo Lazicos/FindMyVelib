@@ -5,35 +5,22 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object ServiceBuilder {
-    private const val infosStations =
-        "https://velib-metropole-opendata.smoove.pro/opendata/Velib_Metropole/station_information.json/"
-    private const val statutStations =
-        "https://velib-metropole-opendata.smoove.pro/opendata/Velib_Metropole/station_status.json/"
+    private const val URL =
+        "https://velib-metropole-opendata.smoove.pro/opendata/Velib_Metropole/"
 
     private val okHttp = OkHttpClient.Builder()
 
     // retrofit builder
-    private val builderInfo = Retrofit
+    private val builder = Retrofit
         .Builder()
-        .baseUrl(infosStations)
-        .addConverterFactory(GsonConverterFactory.create())
-        .client(okHttp.build())
-
-    private val builderStatut = Retrofit
-        .Builder()
-        .baseUrl(statutStations)
+        .baseUrl(URL)
         .addConverterFactory(GsonConverterFactory.create())
         .client(okHttp.build())
 
     // créer l'instance retrofit
-    private val retrofitInfo = builderInfo.build()
-    private val retrofitStatut = builderStatut.build()
+    private val retrofitInfo = builder.build()
 
     fun <T> buildServiceInfo(serviceType: Class<T>): T {
         return retrofitInfo.create(serviceType)
-    }
-
-    fun <T> buildServiceStatut(serviceType: Class<T>): T {
-        return retrofitStatut.create(serviceType)
     }
 }
