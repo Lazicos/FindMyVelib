@@ -6,7 +6,9 @@
     tools:context=".activities.StationVelib"
     android:orientation="vertical"
     android:layout_margin="10dp"
-    android:weightSum="4">
+    style="@style/Theme.FindMyVelib"
+    android:weightSum="5">
+
 
     <TextView
         android:layout_weight="1"
@@ -14,7 +16,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Nom de la station"
+        android:text="@string/nom"
         android:textSize="40sp" />
 
     <LinearLayout
@@ -26,14 +28,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Adresse : "
+            android:text="@string/adresse"
             android:textSize="20sp" />
 
         <TextView
             android:id="@+id/adresseTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="adresse"
+            android:text="@string/adresseTv"
             android:textStyle="bold"
             android:textSize="25sp" />
     </LinearLayout>
@@ -52,14 +54,14 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Vélos disponibles : "
+                android:text="@string/velo"
                 android:textSize="20sp" />
 
             <TextView
                 android:id="@+id/veloDispoTv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="nombre "
+                android:text="@string/veloNombreTv"
                 android:textStyle="bold"
                 android:textSize="25sp" />
 
@@ -67,7 +69,7 @@
                 android:id="@+id/capaciteTv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="/ capacité"
+                android:text="@string/capacite"
                 android:textStyle="bold"
                 android:textSize="25sp" />
         </LinearLayout>
@@ -86,14 +88,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="- Electrique : "
+                    android:text="@string/electrique"
                     android:textSize="20sp" />
 
                 <TextView
                     android:id="@+id/elecTv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="nombre"
+                    android:text="@string/elecTv"
                     android:textStyle="bold"
                     android:textSize="25sp" />
             </LinearLayout>
@@ -106,14 +108,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="- Mécanique : "
+                    android:text="@string/meca"
                     android:textSize="20sp" />
 
                 <TextView
                     android:id="@+id/mecaTv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="nombre"
+                    android:text="@string/mecaTv"
                     android:textStyle="bold"
                     android:textSize="25sp" />
             </LinearLayout>
@@ -129,14 +131,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bornes libres : "
+            android:text="@string/borne"
             android:textSize="20sp" />
 
         <TextView
             android:id="@+id/borneTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="nombre "
+            android:text="@string/borneTv"
             android:textStyle="bold"
             android:textSize="25sp" />
 
@@ -144,8 +146,30 @@
             android:id="@+id/capaciteeTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="/ capacité"
+            android:text="@string/capacite"
             android:textStyle="bold"
             android:textSize="25sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/fav"
+            android:textSize="20sp"
+            android:layout_gravity="center_vertical" />
+
+        <ImageButton
+            android:id="@+id/favoritIb"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:scaleType="fitXY"
+            android:backgroundTint="@color/design_default_color_background"
+            android:src="@drawable/pas_fav"
+            android:contentDescription="@string/etoile_favoris" />
     </LinearLayout>
 </LinearLayout>

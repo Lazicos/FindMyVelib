@@ -1,4 +1,18 @@
 <resources>
     <string name="app_name">FindMyVelib</string>
     <string name="title_activity_maps">MapsActivity</string>
+    <string name="nom">Nom de la station</string>
+    <string name="adresse">Adresse :</string>
+    <string name="adresseTv">adresse</string>
+    <string name="velo">Vélos disponibles :</string>
+    <string name="veloNombreTv">nombre</string>
+    <string name="capacite">/ capacité</string>
+    <string name="electrique">- Electrique :</string>
+    <string name="elecTv">nombre</string>
+    <string name="meca">- Mécanique :</string>
+    <string name="mecaTv">nombre</string>
+    <string name="borne">Bornes libres :</string>
+    <string name="borneTv">nombre</string>
+    <string name="fav">Mettre la station en favoris :</string>
+    <string name="etoile_favoris">Etoile Favoris</string>
 </resources>

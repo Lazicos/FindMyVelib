@@ -1,5 +1,6 @@
 package com.example.findmyvelib.activities
 
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
@@ -10,6 +11,7 @@ import androidx.core.app.ActivityCompat
 import com.example.findmyvelib.R
 import com.example.findmyvelib.databinding.ActivityMapsBinding
 import com.example.findmyvelib.models.InfoStation
+import com.example.findmyvelib.services.DataGestion
 import com.example.findmyvelib.services.InfoApi
 import com.example.findmyvelib.services.ServiceBuilder
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -18,12 +20,22 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+
+/* Activité principale gérant la carte. Elle comprend :
+*   - onCreate(savedInstanceState: Bundle?) : appellée dès le chargement de l'activité
+*   - onMapReady(googleMap: GoogleMap) : connexion à l'API google maps
+*   - setUpMap() : met en place la carte
+*   - placeMarkerOnMap(location: LatLng, id: Long, allFav: ArrayList<List<String>>) : met une pastille à l'emplacement des bornes
+*   - onMarkerClick(marker: Marker) : appel de l'activité StationVelib.kt pour afficher le détail des stations lorsqu'une pastille est cliquée
+*   - loadStations() : permet de charger les stations vélib. Appelle la fonction placeMarkerOnMap
+* */
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
@@ -34,15 +46,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
 
     private lateinit var infoBorne: InfoStation
 
+    private lateinit var context: Context
+
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-//        Log.d("Response", "countrylist size : ${infoBorne.size}")
-
+        context = applicationContext
         super.onCreate(savedInstanceState)
-
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -51,25 +63,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
+        /* Un problème non résolu : si l'application plante, décommenter le paragraphe suivant, runner,
+        commenter et runner à nouveau. */
+
+        /*val dataGestion = DataGestion()
+        val favFile = "Favoris"
+        dataGestion.emptyFile(favFile, context)*/
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
         mMap.uiSettings.isZoomControlsEnabled = true
         mMap.setOnMarkerClickListener(this)
 
         setUpMap()
-
-        /*mMap.setOnMarkerClickListener { marker ->
-            if (marker.isInfoWindowShown) {
-                marker.hideInfoWindow()
-            } else {
-                marker.showInfoWindow()
-            }
-            true
-        }*/
     }
 
     private fun setUpMap() {
@@ -87,67 +96,73 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         }
 
         mMap.isMyLocationEnabled = true
-        /* isMyLocationEnabled = true enables the my-location layer which draws a light blue dot on the user’s location.
-        It also adds a button to the map that, when tapped, centers the map on the user’s location.*/
 
         fusedLocationClient.lastLocation.addOnSuccessListener(this) { location ->
-            // fusedLocationClient.getLastLocation() gives you the most recent location currently available.
-
-            // Got last known location. In some rare situations this can be null.
-            // If you were able to retrieve the the most recent location, then move the camera to the user’s current location.
             if (location != null) {
                 lastLocation = location
                 val currentLatLng = LatLng(location.latitude, location.longitude)
-//                placeMarkerOnMap(currentLatLng)
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 12f))
             }
         }
 
-        /*val findStation = FindStation()
-        val stations = findStation.loadInfo()
-        stations?.map {
-            Log.d("Response", "On map!!!")
-            val station = LatLng(it.lat, it.lon)
-            placeMarkerOnMap(station, it.station_id)
-        }*/
+        val dataGestion = DataGestion()
 
-//        val (pos, id) = LoadStations.loadInfo()
-        loadStations()
+        if (dataGestion.checkForInternet(this)) {
+            loadStations()
+        } else {
+            val favFile = "Favoris"
+            val allFav = dataGestion.show(favFile, context)
+            Log.d("File", "$allFav")
+            for (i in allFav) {
+                val lat = i[6].replace("lat/lng: (", "")
+                val long = i[7].replace(")", "")
+                val latitude = lat.toDouble()
+                val longitude = long.toDouble()
+                val position = LatLng(latitude, longitude)
+                placeMarkerOnMap(position, i[0].toLong(), allFav)
+            }
+        }
     }
 
-    // permet de mettre une pastille a la position des bornes
-    private fun placeMarkerOnMap(location: LatLng, id: Long) {
-        // Create a MarkerOptions object and sets the user’s current location as the position for the marker
+    private fun placeMarkerOnMap(location: LatLng, id: Long, allFav: ArrayList<List<String>>) {
+        // Créé un objet MarkerOptions à la position de la borne
         val markerOptions = MarkerOptions()
             .position(location)
             .title(id.toString())
-        Log.d("Response", "on place capteur!")
 
-        // Add the marker to the map
+        // Changement de couleur pour les marker favoris
+        for (i in allFav) {
+            if (i[0] == id.toString()) {
+                markerOptions
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+            }
+        }
+        // Ajout du marker sur la carte
         mMap.addMarker(markerOptions)
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
         val id = marker.title
-        val intent = Intent(this@MapsActivity, StationVelib::class.java)
-        intent.putExtra("id", id)
+        val intent = Intent(context, StationVelib::class.java).apply {
+            putExtra("id", id)
+        }
         startActivity(intent)
-
         return false
     }
 
     private fun loadStations() {
+        val dataGestion = DataGestion()
+        val favFile = "Favoris"
+        val allFav = dataGestion.show(favFile, context)
+
         //initiate the service
         val stationService = ServiceBuilder.buildServiceInfo(InfoApi::class.java)
         val requestCall = stationService.getInfoStation()
         //make network call asynchronously
         requestCall.enqueue(object : Callback<InfoStation> {
             override fun onResponse(call: Call<InfoStation>, response: Response<InfoStation>) {
-                Log.d("Response", "onResponse: ${response.body()}")
                 if (response.isSuccessful) {
                     infoBorne = response.body()!!
-                    Log.d("Response", "countrylist size : $infoBorne")
-//                        for (location in infoBorne) {
                     val stations = infoBorne.data.stations
                     stations.map {
                         InfoStation.Data.Station(
@@ -162,7 +177,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
                     }
                         .map {
                             val station = LatLng(it.lat, it.lon)
-                            placeMarkerOnMap(station, it.station_id)
+                            placeMarkerOnMap(station, it.station_id, allFav)
                         }
                 }
             }
