@@ -19,6 +19,9 @@ Problèmes rencontrés :
   - La connexion à l'API maps
   - La récupération des données de Vélib
   - La suppression de station favorites
+  - Optimiser le code pour avoir moins de lag (abandon, si l'on va trop vite l'application peut buger. Si en retournant sur maps les stations ne s'affichent pas,
+    cliquer sur la flèche retour et retourner sur l'application)
+  - Rendre le code plus agréable à lire avec les appels de l'API Vélib dans une même classe (abandon)
 
 
 BUG NON RESOLU !!!! Le fait de tester si le fichier Favoris existe ne fonctionne pas et supprime le fichier, la seule solution trouvée a été de ne pas faire ce test.
